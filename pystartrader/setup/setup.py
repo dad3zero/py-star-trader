@@ -31,6 +31,7 @@ def create_original_starsystem(star_names: list[str], max_stars=4):
     through class IV, III, II and place as many planets as the setup asks for.
 
     The minimum distance between planets must be 15 units. If less, we toss again.
+
     :param star_names: Names of
     :param max_stars: Number of stars to create, must be at least 4
     :raises ValueError: if max_stars < 4 or less star names than expected stars.
@@ -50,14 +51,14 @@ def create_original_starsystem(star_names: list[str], max_stars=4):
     star_names = star_names[:max_stars - 1]
     cycle_cycler = itertools.cycle(Cycle.__members__.items())
 
-    stars.append(create_star(star_names.pop(0), galaxy.EvolutionLevel.FRONTIER, next(cycle_cycler)[1]))
-    stars.append(create_star(star_names.pop(0), galaxy.EvolutionLevel.FRONTIER, next(cycle_cycler)[1]))
-    stars.append(create_star(star_names.pop(0), galaxy.EvolutionLevel.UNDERDEVELOPED, next(cycle_cycler)[1]))
+    add_star(stars, star_names.pop(0), galaxy.EvolutionLevel.FRONTIER, next(cycle_cycler)[1])
+    add_star(stars, star_names.pop(0), galaxy.EvolutionLevel.FRONTIER, next(cycle_cycler)[1])
+    add_star(stars, star_names.pop(0), galaxy.EvolutionLevel.UNDERDEVELOPED, next(cycle_cycler)[1])
 
     planets_level = [galaxy.EvolutionLevel.FRONTIER, galaxy.EvolutionLevel.UNDERDEVELOPED, galaxy.EvolutionLevel.DEVELOPED]
 
     for name, level, cycle in zip(star_names, itertools.cycle(planets_level), cycle_cycler):
-        stars.append(create_star(name, level, cycle[1]))
+        add_star(stars, name, level, cycle[1])
 
     return stars
 
@@ -83,6 +84,20 @@ def create_star(name: str, level, cycle=None):
             y = -y
 
     return galaxy.Star(name, level, x, y)
+
+def add_star(starsystem:list[galaxy.Star], name:str, level, cycle):
+    new_star = create_star(name, level, cycle)
+    if validate_star_distances(new_star, starsystem):
+        starsystem.append(new_star)
+    else:
+        add_star(starsystem, name, level, cycle)
+
+def validate_star_distances(new_star: galaxy.Star, stars:list[galaxy.Star]):
+    for star in stars:
+        if abs(star.x - new_star.x) < 15 or abs(star.y - new_star.y) < 15:
+            return False
+
+    return True
 
 def do_setup():
     pass
