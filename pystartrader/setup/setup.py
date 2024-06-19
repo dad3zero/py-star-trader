@@ -1,6 +1,7 @@
 import random
 import itertools
 from enum import Enum
+import logging
 
 from pystartrader.startrader import galaxy
 from pystartrader import settings
@@ -70,27 +71,30 @@ def create_star(name: str, level, cycle=None):
 
     if cycle:
         if cycle is Cycle.NORTH:
-            y = -y if random.randint(-1, 1) < 0 else y
+            x = -x if random.randint(-1, 1) < 0 else x
 
         elif cycle is cycle.EAST:
-            x = -x if random.randint(-1, 1) < 0 else x
-
-        elif cycle is cycle.SOUTH:
-            x = -x
             y = -y if random.randint(-1, 1) < 0 else y
 
-        elif cycle is cycle.WEST:
+        elif cycle is cycle.SOUTH:
             x = -x if random.randint(-1, 1) < 0 else x
             y = -y
+
+        elif cycle is cycle.WEST:
+            x = -x
+            y = -y if random.randint(-1, 1) < 0 else y
 
     return galaxy.Star(name, level, x, y)
 
 def add_star(starsystem:list[galaxy.Star], name:str, level, cycle):
-    new_star = create_star(name, level, cycle)
-    if validate_star_distances(new_star, starsystem):
-        starsystem.append(new_star)
-    else:
-        add_star(starsystem, name, level, cycle)
+    is_valid = False
+    while not is_valid:
+        new_star = create_star(name, level, cycle)
+        is_valid = validate_star_distances(new_star, starsystem)
+
+    logging.debug("New star %s created", new_star)
+    starsystem.append(new_star)
+
 
 def validate_star_distances(new_star: galaxy.Star, stars:list[galaxy.Star]):
     for star in stars:
@@ -100,4 +104,5 @@ def validate_star_distances(new_star: galaxy.Star, stars:list[galaxy.Star]):
     return True
 
 def do_setup():
-    pass
+    star_system = create_original_starsystem(settings.STAR_NAMES, 8)
+    return star_system
