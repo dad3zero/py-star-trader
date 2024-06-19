@@ -46,7 +46,9 @@ def create_original_starsystem(star_names: list[str], max_stars=4):
 
     star_names = star_names.copy()  # Working on a copy to avoid destruction on referenced data
 
-    stars.append(galaxy.Star(star_names.pop(0), galaxy.EvolutionLevel.COSMOPOLITAN, 0, 0))
+    stars.append(galaxy.Star(star_names.pop(0),
+                             galaxy.EvolutionLevel.COSMOPOLITAN,
+                             0, 0))
 
     random.shuffle(star_names)
     star_names = star_names[:max_stars - 1]
@@ -106,3 +108,55 @@ def validate_star_distances(new_star: galaxy.Star, stars:list[galaxy.Star]):
 def do_setup():
     star_system = create_original_starsystem(settings.STAR_NAMES, 8)
     return star_system
+
+
+def get_sol_coordinates():
+    """
+    Create coordinates for SOL which should be the central star.
+
+    :return: a tuple of coordinates, (0, 0)
+    """
+    return 0, 0
+
+
+def get_random_developed_class_coordinates(map_size=100):
+    """
+    Creates a new class II star coordinates. A class II star appears in the
+    central half of the box.
+
+    :param map_size: Size of the map with the historical value as default.
+    :return: a tuple of coordinates with values from -25 to 25
+    """
+    inner_zone = map_size / 2
+    x = round(random.random() * inner_zone - (inner_zone / 2))
+    y = round(random.random() * inner_zone - (inner_zone / 2))
+
+    return x, y
+
+
+def get_random_underdeveloped_class_coordinates(map_size=100):
+    """
+    Creates a new class III star coordinates. A class III star appears anywhere.
+
+    :return: a tuple of coordinates with values from -50 to 50
+    """
+    x = round(random.random() * map_size - (map_size / 2))
+    y = round(random.random() * map_size - (map_size / 2))
+
+    return x, y
+
+
+def get_random_frontier_class_coordinates():
+    """
+    Creates a new class IV star coordinates. A class IV star appears outside
+    the central 50 ly box.
+
+    :return: a tuple of coordinates with values from -50 to -25 or 25 to 50.
+    """
+    x = random.random()
+    x = round((x if x > 0.5 else x - 1) * 50)
+
+    y = random.random()
+    y = round((y if y > 0.5 else y - 1) * 50)
+
+    return x, y
